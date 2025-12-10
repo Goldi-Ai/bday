@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Memory Lane — Tanu 💕</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+      :root{
+        --bg1: #ffcee6;
+        --bg2: #ffd6f1;
+        --accent: #ff6ec4;
+        --accent-2: #a485ff;
+        --text: #3b2232;
+        --card-shadow: 0 12px 30px rgba(255,105,180,0.14);
+        --glass: rgba(255,255,255,0.6);
+        --glow: 0 12px 40px rgba(255,110,196,0.28);
+      }
+
+      *{box-sizing:border-box}
+      html,body{height:100%;margin:0;font-family:"Poppins",system-ui,Segoe UI,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+      body{
+        background: linear-gradient(135deg,var(--bg1) 0%, var(--bg2) 100%);
+        color:var(--text);
+        overflow-x:hidden;
+      }
+
+      .page { max-width:1300px; margin:28px auto; padding:20px; position:relative; }
+
+      .header { text-align:center; margin-bottom:18px; }
+      .header h1{ margin:0; font-family:"Pacifico",cursive; font-size:42px; color:#ff4e91; text-shadow:3px 3px 0 rgba(255,165,213,0.28); }
+      .header p{
+        margin-top:10px;
+        display:inline-block;
+        background:var(--glass);
+        padding:10px 14px;
+        border-radius:12px;
+        color: #553a50;
+        font-size:15px;
+        max-width:900px;
+        line-height:1.4;
+      }
+
+      /* controls */
+      .controls{ display:flex; gap:12px; align-items:center; justify-content:center; margin:14px 0 28px; flex-wrap:wrap; }
+      .music-btn{
+        display:inline-flex; gap:10px; align-items:center; padding:14px 18px; border-radius:999px; border:none;
+        background:linear-gradient(90deg,var(--accent),var(--accent-2)); color:white; font-weight:700; cursor:pointer;
+        box-shadow:0 10px 28px rgba(117,198,255,0.12); font-size:16px;
+      }
+      .music-btn:active{ transform: translateY(1px) }
+
+      .hint { font-size:15px; color:#4b3a46; opacity:.95; background:transparent; padding:8px 12px; border-radius:10px; }
+
+      /* ---------- Grid gallery ---------- */
+      .gallery {
+        display:grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap:18px;
+        align-items:start;
+        width:100%;
+        margin-top:6px;
+      }
+
+      .memory-card{
+        position:relative;
+        overflow:hidden;
+        border-radius:14px;
+        height:230px;
+        background:#fff;
+        box-shadow:var(--card-shadow);
+        border:6px solid white;
+        transform: rotate(var(--rotate, 0deg));
+        transition: transform 280ms cubic-bezier(.2,.9,.2,1), box-shadow 280ms, filter 280ms;
+        display:block;
+        /* gentle glow */
+        box-shadow: var(--glow);
+        filter: drop-shadow(0 10px 30px rgba(255,110,196,0.12));
+      }
+
+      .memory-card:hover{
+        transform: scale(1.06) translateY(-8px) rotate(var(--rotate, 0deg));
+        box-shadow: 0 30px 80px rgba(255, 110, 196, 0.28);
+        filter: drop-shadow(0 20px 60px rgba(164,133,255,0.18));
+      }
+
+      .memory-img{
+        width:100%;
+        height:100%;
+        display:block;
+        object-fit:cover;
+        transition: transform 600ms ease, filter 400ms ease;
+        border-radius:8px;
+        /* soft inner glow using filter + box-shadow from parent */
+        will-change: transform, filter;
+      }
+      .memory-card:hover .memory-img{
+        transform: scale(1.08);
+        filter: brightness(1.04) saturate(1.06) drop-shadow(0 14px 40px rgba(161,140,209,0.12));
+      }
+
+      /* remove small white "tape" box that was covering photo */
+      .card-tape { display: none !important; } /* user requested removal */
+
+      /* caption hidden by default, slide up on hover */
+      .memory-caption{
+        position:absolute;
+        left:0; right:0; bottom:-100%;
+        padding:14px 12px;
+        text-align:center;
+        font-size:14px;
+        line-height:1.3;
+        background: linear-gradient(180deg, rgba(255,110,196,0.96), rgba(164,133,255,0.94));
+        color:white;
+        transition: bottom 340ms cubic-bezier(.2,.9,.2,1), opacity 200ms;
+        box-shadow:0 -6px 20px rgba(0,0,0,0.12);
+      }
+      .memory-card:hover .memory-caption{ bottom:0 }
+
+      .card-sticker{ position:absolute; width:44px; height:44px; bottom:10px; right:10px; z-index:8; filter:drop-shadow(0 3px 10px rgba(0,0,0,0.18)); }
+      .card-sticker svg{ width:100%; height:100% }
+
+      /* Floating butterflies & hearts container (visual only) */
+      .float-container { position:fixed; inset:0; pointer-events:none; z-index:800; overflow:hidden; }
+
+      .butterfly {
+        position:fixed;
+        width:36px;
+        height:28px;
+        pointer-events:none;
+        transform-origin:center;
+        will-change: transform, opacity, left, top;
+        opacity:0.95;
+        filter: drop-shadow(0 6px 16px rgba(0,0,0,0.12));
+      }
+      .butterfly svg { width:100%; height:100%; display:block; }
+
+      .heart-float {
+        position:fixed;
+        width:18px;
+        height:18px;
+        font-size:18px;
+        pointer-events:none;
+        opacity:0.95;
+        transform:translateY(0);
+        will-change: transform, opacity, left, top;
+        text-shadow: 0 2px 6px rgba(0,0,0,0.12);
+      }
+
+      /* butterfly animation helpers */
+      @keyframes floatAcross {
+        0% { transform: translateY(0) scale(0.9) rotate(-10deg); opacity:0; }
+        10% { opacity:1; }
+        50% { transform: translateY(-10vh) scale(1.08) rotate(6deg); }
+        90% { opacity:1; }
+        100% { transform: translateY(-60vh) scale(0.9) rotate(18deg); opacity:0; }
+      }
+
+      @keyframes heartUp {
+        0% { transform: translateY(0) scale(0.9); opacity:0; }
+        15% { opacity:1; }
+        100% { transform: translateY(-80vh) scale(1.2); opacity:0; }
+      }
+
+      /* Navigation buttons */
+      .floating-nav {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 22px;
+        display:flex;
+        gap: 16px;
+        z-index: 1200;
+        align-items:center;
+        justify-content:center;
+        pointer-events: auto;
+      }
+      .big-btn {
+        padding: 14px 22px;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 18px;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+      }
+      .back-btn { background: white; color: var(--text); border: 1px solid rgba(0,0,0,0.06); }
+      .next-btn { background: linear-gradient(90deg,var(--accent-2),var(--accent)); color: white; }
+
+      /* Responsive */
+      @media (max-width:1100px){ .gallery{ grid-template-columns: repeat(4, 1fr) } .memory-card{ height:210px } }
+      @media (max-width:900px){ .gallery{ grid-template-columns: repeat(3, 1fr) } .memory-card{ height:200px } }
+      @media (max-width:600px){
+        .gallery{ grid-template-columns: repeat(2, 1fr); gap:12px }
+        .memory-card{ height:150px; border-radius:12px }
+        .header h1{ font-size:30px }
+        .controls{ gap:8px; padding:0 10px }
+        .music-btn{ padding:12px 14px; font-size:15px }
+        .floating-nav{ bottom:14px }
+        .big-btn{ padding:12px 18px; font-size:16px }
+      }
+
+      /* Lightbox */
+      .lightbox { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 2000; }
+      .lightbox.visible { display:flex; }
+      .lightbox-backdrop { position:absolute; inset:0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+      .lightbox-content { position: relative; max-width: min(1100px, 95vw); max-height: 90vh; width: 95%; display:flex; align-items:center; justify-content:center; gap:20px; }
+      .lightbox-image-wrap { flex: 1 1 auto; display:flex; align-items:center; justify-content:center; max-height: 90vh; overflow: hidden; }
+      .lightbox-image { max-width: 100%; max-height: 90vh; object-fit: contain; border-radius: 10px; box-shadow: 0 18px 50px rgba(0,0,0,0.4); }
+      .lightbox-caption { width: 360px; max-height: 90vh; overflow:auto; background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)); color: #fff; padding: 18px; border-radius: 10px; font-size: 16px; line-height: 1.45; text-shadow: 0 2px 10px rgba(0,0,0,0.25); }
+      .lightbox-caption h3{ margin:0 0 10px; font-size:18px; color:#ffdff1 }
+      .close-x { position:absolute; top:14px; right:14px; z-index:2100; background: rgba(255,255,255,0.08); color:white; border:none; padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:700; }
+      .nav-arrow { position:absolute; top:50%; transform:translateY(-50%); color:white; background: rgba(0,0,0,0.35); width:52px; height:52px; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:22px; cursor:pointer; z-index:2100; }
+      .nav-arrow.left { left:18px; } .nav-arrow.right { right:18px; }
+      @media (max-width:900px){ .lightbox-caption { display:none } .lightbox-content { width: 98%; gap: 10px; } .nav-arrow { width:44px; height:44px; font-size:20px } }
+    </style>
+  </head>
+
+  <body>
+    <div class="page" role="main">
+      <header class="header" role="banner">
+        <h1>Memory Lane — Tanu 💕</h1>
+        <p>"Good friends are like stars — you don't always see them, but you know they're always there." ✨</p>
+      </header>
+
+      <div class="controls" role="region" aria-label="Music and hints">
+        <button id="musicToggle" class="music-btn" aria-pressed="false" title="Play / Pause background music">
+          <span id="musicIcon">▶</span>
+          <span id="musicLabel" style="font-weight:700">Play Music</span>
+        </button>
+
+        <div class="hint">"We don't remember days, we remember moments." — Tap or hover a photo to open it and read the memory.</div>
+      </div>
+
+      <!-- GRID GALLERY -->
+      <section aria-label="Memory gallery">
+        <div class="gallery" id="memoryGallery" role="list"></div>
+      </section>
+
+      <div class="floating-nav" role="navigation" aria-label="Navigation buttons">
+        <a href="index.html" class="big-btn back-btn" id="backToWelcome" style="text-decoration:none;padding:14px 20px;border-radius:12px;font-weight:800;font-size:18px;">← Back to Welcome</a>
+        <button id="nextSurprise" class="big-btn next-btn" style="padding:14px 22px;border-radius:12px;font-weight:800;font-size:18px;">✨ Next Surprise (Reel)! ✨</button>
+      </div>
+
+      <footer style="text-align:center;margin-top:18px;color:#4b3a46;opacity:.9;padding-bottom:80px;">Happy Birthday, Tanu 🎂💖</footer>
+    </div>
+
+    <!-- Floating visual container for butterflies/hearts -->
+    <div class="float-container" aria-hidden="true" id="floatContainer"></div>
+
+    <!-- Audio element (bgm.mp3 in same folder as this HTML file) -->
+    <audio id="bgAudio" autoplay muted loop preload="auto">
+      <source src="bgm.mp3" type="audio/mpeg">
+      Your browser does not support audio playback.
+    </audio>
+
+    <!-- LIGHTBOX -->
+    <div id="lightbox" class="lightbox" aria-hidden="true" role="dialog" aria-label="Image preview">
+      <div class="lightbox-backdrop" data-close="true"></div>
+      <div class="lightbox-content" role="document">
+        <button class="close-x" id="lightboxClose" aria-label="Close (Esc)">✕</button>
+        <div class="lightbox-image-wrap" id="lightboxWrap">
+          <img src="" alt="" id="lightboxImage" class="lightbox-image" draggable="false">
+        </div>
+        <div class="lightbox-caption" id="lightboxCaption">
+          <h3><!-- intentionally left blank per your request --></h3>
+          <p id="lightboxText"></p>
+        </div>
+        <div class="nav-arrow left" id="lightPrev" title="Previous (arrow left)">‹</div>
+        <div class="nav-arrow right" id="lightNext" title="Next (arrow right)">›</div>
+      </div>
+    </div>
+
+    <!-- GSAP (optional animations) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+
+    <script>
+/* ---------------- CAPTIONS (39 total, age-based, no age mentioned) ---------------- */
+
+const personalMessages = [
+  // 1 — baby
+  "The tiniest spark that grew into the brightest soul. 💗",
+
+  // 2–12 (cute childhood)
+  "Little troublemaker energy — but adorable. 😄",
+  "That smile could melt anyone’s heart. ✨",
+  "Pure innocence in one frame. 💕",
+  "Tiny steps, big dreams forming.",
+  "The kind of cuteness impossible to recreate. 🌸",
+  "Joy in its most natural form — you.",
+  "Messy hair, pure heart. ☀️",
+  "Mini you, same magic.",
+  "Cute cheeks, cuter aura. 🧁",
+  "Eyes full of wonder.",
+  "Small hands holding big happiness. 💖",
+
+  // 13–25 (sweet teen years)
+  "Soft face, shy smile — sweetest era. 🌷",
+  "Growing into your charm effortlessly.",
+  "A calm kind of pretty.",
+  "Quiet confidence becoming visible.",
+  "A chapter full of tiny beautiful changes. 📖",
+  "Simple smile, huge effect.",
+  "Graceful without trying.",
+  "Learning, glowing, becoming. ✨",
+  "Soft heart, strong mind.",
+  "A phase where innocence met confidence.",
+  "Camera noticed your glow first. 📸",
+  "Calm, subtle, unforgettable beauty.",
+  "Just becoming more ‘you’. 💕",
+
+  // 26–39 (youth, confident & aesthetic)
+  "This is where everyone realized you're special. ✨",
+  "Elegance + confidence = you.",
+  "An instant favourite kind of photo. 💗",
+  "Gentle glow, powerful vibe.",
+  "Your presence started shining louder.",
+  "Aesthetic level: unmatched.",
+  "Smile becoming strength.",
+  "Pretty, peaceful, unbothered.",
+  "Camera loves you — proof here.",
+  "Soft outside, fierce inside. 🌙",
+  "Main character energy.",
+  "Elegant, bold, stunning.",
+  "A picture that feels like growth.",
+  "The kind that makes you think, ‘she’s going far.’ 💫"
+];
+
+/* ---------------- BUILD MEMORY ARRAY (1–39, mixed .png/.jpg) ---------------- */
+
+const memories = Array.from({ length: 39 }, (_, i) => {
+  const idx = i + 1;
+  const ext = idx === 1 ? "jpg" : (idx >= 2 && idx <= 12 ? "png" : "jpg");
+  const imagePath = `img/${idx}.${ext}`;
+  const emojiSet = ["🌸","🌺","🎀","✨","💕","🎂","📸","🌈","💫","🌙","🌅","🚗","🍕","🏕️","🎵","🏰","🏖️","💕","🎂","✨","📸","🌈","🎈","🍰","🌊","🏞️","🎶","💫","🌸","🌺","🎀","✨","💕","🎂","📸","🌈","💫","🌙"];
+  return {
+    image: imagePath,
+    caption: personalMessages[i],
+    rotationAngle: ((i % 5) - 2) * 2,
+    emoji: emojiSet[i % emojiSet.length]
+  };
+});
+
+/* ---------------- RENDER GALLERY ---------------- */
+
+function buildGallery(){
+  const gallery = document.getElementById('memoryGallery');
+  gallery.innerHTML = '';
+  memories.forEach((m, idx) => {
+    const card = document.createElement('div');
+    card.className = 'memory-card';
+    card.style.setProperty('--rotate', `${m.rotationAngle}deg`);
+    card.setAttribute('role','listitem');
+    card.setAttribute('tabindex','0');
+    card.setAttribute('data-index', idx);
+
+    card.innerHTML = `
+      <img class="memory-img" loading="lazy" src="${m.image}" alt="Memory ${idx+1}">
+      <div class="memory-caption">${m.caption}</div>
+      <div class="card-sticker" aria-hidden="true">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="50" fill="#ff6ec4" />
+          <text x="50" y="65" font-family="Arial" font-size="40" text-anchor="middle" fill="white">${m.emoji}</text>
+        </svg>
+      </div>
+    `;
+
+    card.addEventListener('click', () => openLightbox(idx));
+    card.addEventListener('keydown', (e) => { if(e.key === 'Enter') openLightbox(idx); });
+
+    gallery.appendChild(card);
+  });
+}
+
+/* ---------------- Touch captions toggle ---------------- */
+
+function enableTouchCaptionToggle(){
+  const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+  if(!isTouch) return;
+
+  document.getElementById('memoryGallery').addEventListener('click', function(e){
+    const card = e.target.closest('.memory-card');
+    if(!card) return;
+    const caption = card.querySelector('.memory-caption');
+    if(!caption) return;
+    if(caption.classList.contains('show-on-touch')) caption.classList.remove('show-on-touch');
+    else {
+      document.querySelectorAll('.memory-caption.show-on-touch').forEach(c=>c.classList.remove('show-on-touch'));
+      caption.classList.add('show-on-touch');
+      setTimeout(()=> caption.classList.remove('show-on-touch'), 4500);
+    }
+  });
+
+  document.addEventListener('click', function(e){
+    if(!e.target.closest('.memory-card')){
+      document.querySelectorAll('.memory-caption.show-on-touch').forEach(c=>c.classList.remove('show-on-touch'));
+    }
+  });
+}
+
+/* ---------------- Music control ---------------- */
+
+const audio = document.getElementById('bgAudio');
+const musicToggle = document.getElementById('musicToggle');
+const musicIcon = document.getElementById('musicIcon');
+const musicLabel = document.getElementById('musicLabel');
+
+function setMusicState(playing){
+  musicToggle.setAttribute('aria-pressed', String(!!playing));
+  if(playing){ musicIcon.textContent = '⏸'; musicLabel.textContent = 'Pause Music'; }
+  else { musicIcon.textContent = '▶'; musicLabel.textContent = 'Play Music'; }
+}
+
+musicToggle.addEventListener('click', async () => {
+  try {
+    if(audio.paused){ await audio.play(); setMusicState(true); } else { audio.pause(); setMusicState(false); }
+  } catch(e){
+    try { audio.muted = false; await audio.play(); setMusicState(true); } catch(_) { setMusicState(false); }
+  }
+});
+musicToggle.addEventListener('keydown', (e) => { if(e.key === ' ' || e.key === 'Enter'){ e.preventDefault(); musicToggle.click(); } });
+
+/* ---------------- LIGHTBOX ---------------- */
+
+const lightbox = document.getElementById('lightbox');
+const lightboxImage = document.getElementById('lightboxImage');
+const lightboxText = document.getElementById('lightboxText');
+const lightboxCaptionTitle = document.querySelector('.lightbox-caption h3');
+const lightboxClose = document.getElementById('lightboxClose');
+const lightPrev = document.getElementById('lightPrev');
+const lightNext = document.getElementById('lightNext');
+let currentIndex = 0;
+
+function openLightbox(index){
+  currentIndex = index;
+  const mem = memories[index];
+  lightboxImage.src = mem.image;
+  lightboxImage.alt = `Memory ${index+1}`;
+  lightboxText.textContent = mem.caption;
+  lightboxCaptionTitle.textContent = "";
+  lightbox.classList.add('visible');
+  lightbox.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+  lightboxClose.focus();
+}
+
+function closeLightbox(){
+  lightbox.classList.remove('visible');
+  lightbox.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+  lightboxImage.src = '';
+}
+
+function showPrev(){
+  currentIndex = (currentIndex - 1 + memories.length) % memories.length;
+  openLightbox(currentIndex);
+}
+function showNext(){
+  currentIndex = (currentIndex + 1) % memories.length;
+  openLightbox(currentIndex);
+}
+
+lightboxClose.addEventListener('click', closeLightbox);
+document.querySelector('.lightbox-backdrop').addEventListener('click', closeLightbox);
+lightPrev.addEventListener('click', showPrev);
+lightNext.addEventListener('click', showNext);
+
+document.addEventListener('keydown', function(e){
+  if(!lightbox.classList.contains('visible')) return;
+  if(e.key === 'Escape') closeLightbox();
+  if(e.key === 'ArrowLeft') showPrev();
+  if(e.key === 'ArrowRight') showNext();
+});
+
+/* ---------------- Lightbox touch swipe ---------------- */
+
+(function enableLightboxSwipe(){
+  let startX = 0, startY = 0, distX = 0, distY = 0;
+  const threshold = 40;
+  const wrap = document.getElementById('lightboxWrap');
+  let touching = false;
+
+  wrap.addEventListener('touchstart', function(e){
+    const t = e.touches[0]; startX = t.clientX; startY = t.clientY; touching = true;
+  }, {passive:true});
+
+  wrap.addEventListener('touchmove', function(e){
+    if(!touching) return;
+    const t = e.touches[0]; distX = t.clientX - startX; distY = t.clientY - startY;
+  }, {passive:true});
+
+  wrap.addEventListener('touchend', function(){
+    touching = false;
+    if(Math.abs(distX) > Math.abs(distY) && Math.abs(distX) > threshold){
+      if(distX > 0) showPrev(); else showNext();
+    }
+    startX = startY = distX = distY = 0;
+  });
+})();
+
+setInterval(()=>{
+    const el=document.createElement("div");
+    el.className="float-bfly";
+
+    // Same emojis as letter page
+    const arr=["💗","🦋","💞","💜","🦋","💖"];
+    el.innerHTML = arr[Math.floor(Math.random()*arr.length)];
+
+    el.style.left = Math.random()*window.innerWidth + "px";
+    el.style.top = (window.innerHeight-20) + "px";
+    el.style.fontSize = (20 + Math.random()*20) + "px";
+    el.style.position = "fixed";
+    el.style.pointerEvents = "none";
+    el.style.opacity = "0.75";
+    el.style.animation = `floatUp ${4+Math.random()*4}s linear forwards`;
+
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),7000);
+}, 550);
+
+// Same animation as letter page
+const style = document.createElement("style");
+style.innerHTML = `
+@keyframes floatUp {
+    0%{ transform:translateY(0) rotate(0deg); opacity:0.8; }
+    100%{ transform:translateY(-160px) rotate(8deg); opacity:0; }
+}
+`;
+document.head.appendChild(style);
+
+/* ---------------- INITIAL SETUP ---------------- */
+
+document.addEventListener('DOMContentLoaded', function(){
+  buildGallery();
+  enableTouchCaptionToggle();
+
+  // try autoplay fallback
+  audio.muted = true;
+  const p = audio.play();
+  if(p !== undefined){
+    p.then(()=>{ audio.pause(); audio.currentTime = 0; audio.muted = false; setMusicState(false); }).catch(()=> setMusicState(false));
+  }
+
+  // Next Surprise button goes to cake.html
+  document.getElementById('nextSurprise').addEventListener('click', function(){
+    window.location.href = 'reel.html';
+  });
+
+  // entry animation (if GSAP available)
+  if(window.gsap){
+    gsap.from('.header h1', {duration:0.9, y:-18, opacity:0, ease:'power2.out'});
+    gsap.from('.gallery .memory-card', {duration:0.9, y:16, opacity:0, stagger:0.04, ease:'power2.out'});
+  }
+});
+
+/* Accessibility: trap focus inside lightbox while open (basic) */
+document.addEventListener('focusin', function(e){
+  if(!lightbox.classList.contains('visible')) return;
+  if(!lightbox.contains(e.target)) {
+    e.stopPropagation();
+    lightboxClose.focus();
+  }
+});
+
+/* Auto-unmute after load (best-effort) */
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    audio.muted = false;
+    audio.volume = 1.0;
+    audio.play().catch(() => {});
+  }, 1000);
+});
+
+/* Failsafe: first user click starts music */
+document.addEventListener("click", () => {
+  audio.muted = false;
+  audio.play().catch(() => {});
+}, { once: true });
+
+    </script>
+  </body>
+</html>

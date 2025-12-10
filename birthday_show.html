@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Happy Birthday Tanu ✨</title>
+
+<style>
+body{
+    margin:0;
+    height:100vh;
+    overflow:hidden;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:radial-gradient(circle at center,#140018,#000000 70%);
+    animation:bgShift 12s infinite alternate ease-in-out;
+    font-family:'Poppins',sans-serif;
+}
+
+/* --- CINEMATIC TEXT --- */
+h1{
+    font-size:78px;
+    text-align:center;
+    letter-spacing:5px;
+    color:transparent;
+    background:linear-gradient(90deg,#ff55cf,#b388ff,#77f1ff);
+    -webkit-background-clip:text;
+    background-clip:text;
+
+    opacity:0;
+    transform:scale(0.8);
+    animation:
+        fadeInTitle 2.4s forwards ease-out,
+        glow 2.5s infinite alternate ease-in-out 2.4s;
+}
+
+@keyframes fadeInTitle{
+    0%{opacity:0;transform:scale(0.7) translateY(40px);}
+    100%{opacity:1;transform:scale(1) translateY(0);}
+}
+
+@keyframes glow{
+    0%{
+        text-shadow:
+        0 0 25px #ff8cd9,
+        0 0 40px #b388ff;
+    }
+    100%{
+        text-shadow:
+        0 0 40px #ff4ecf,
+        0 0 70px #9fe9ff,
+        0 0 90px #b388ff;
+    }
+}
+
+/* --- STAR PARTICLES --- */
+.star{
+    position:absolute;
+    width:4px;height:4px;
+    border-radius:50%;
+    background:white;
+    opacity:.6;
+    animation:fall 5s linear infinite;
+}
+
+@keyframes fall{
+    0%{transform:translateY(-20px) scale(0.8);}
+    100%{transform:translateY(110vh) scale(0.3);}
+}
+
+/* --- SHOOTING STAR --- */
+.shooting{
+    position:absolute;
+    width:2px;
+    height:70px;
+    background:linear-gradient(to bottom,#fff,transparent);
+    opacity:0.9;
+    transform:rotate(45deg);
+    animation:shoot 1.2s ease-out;
+}
+
+@keyframes shoot{
+    0%{transform:translate(-200px,-200px) rotate(45deg);opacity:1;}
+    100%{transform:translate(1200px,900px) rotate(45deg);opacity:0;}
+}
+
+/* --- BACKGROUND SHIFT --- */
+@keyframes bgShift{
+    0%{background:radial-gradient(circle,#20002e,#000);}
+    50%{background:radial-gradient(circle,#12001b,#000);}
+    100%{background:radial-gradient(circle,#240033,#000);}
+}
+</style>
+</head>
+<body>
+
+<h1>HAPPY BIRTHDAY<br>TANU ✨</h1>
+
+<script>
+/* -------- REGULAR STARS -------- */
+for(let i=0;i<140;i++){
+    let s=document.createElement("div");
+    s.className="star";
+    s.style.left=Math.random()*100+"%";
+    s.style.top=Math.random()*-100+"px";
+    s.style.animationDuration=(3+Math.random()*3)+"s";
+    document.body.appendChild(s);
+}
+
+/* -------- SHOOTING STARS -------- */
+setInterval(()=>{
+    let st=document.createElement("div");
+    st.className="shooting";
+    st.style.left=Math.random()*50+"vw";
+    st.style.top=Math.random()*20+"vh";
+    document.body.appendChild(st);
+    setTimeout(()=>st.remove(),1200);
+},4000);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Birthday Letter ✨</title>
+
+<style>
+*{
+    margin:0; padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+body{
+    background:linear-gradient(135deg,#ffd8f5,#e8d8ff,#cce7ff);
+    background-size:300% 300%;
+    animation:bgShift 18s infinite alternate;
+    overflow-x:hidden;   /* horizontal hide */
+    overflow-y:auto;     /* vertical scrolling allowed */
+    min-height:100vh;
+}
+
+/* ---------------- ENVELOPE ---------------- */
+.envelope-container{
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    animation:fadeIn 1.5s ease forwards;
+}
+
+.envelope{
+    width:290px;
+    height:210px;
+    background:#fff0f8;
+    position:relative;
+    cursor:pointer;
+    border-radius:14px;
+    box-shadow:0 14px 30px rgba(0,0,0,0.25);
+    transition:0.3s ease;
+    overflow:hidden;
+}
+
+.envelope:hover{ transform:scale(1.06); }
+
+/* Decorative frame (1D option) */
+.envelope::after{
+    content:"🎀";
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%, -50%) scale(2.2);
+    opacity:0.5;
+    font-size:40px;
+}
+
+/* Flap */
+.envelope::before{
+    content:"";
+    position:absolute;
+    top:0; left:0;
+    width:100%; height:55%;
+    background:#ffb3df;
+    clip-path:polygon(0 0,100% 0,50% 100%);
+    transform-origin:top;
+    transition:0.8s ease;
+}
+
+/* ---------------- LETTER BOX ---------------- */
+.letter {
+    width: 90%;
+    max-width: 780px;
+    background: white;
+    padding: 35px;
+    border-radius: 22px;
+    box-shadow: 0 14px 40px rgba(0,0,0,0.25);
+
+    position: absolute;
+    left: 50%;
+    top: 120%;
+    transform: translateX(-50%) scale(0.8);
+    opacity: 0;
+    transition: 1s cubic-bezier(.2,1.2,.4,1);
+
+    /* ★ THE MAIN FIXES ★ */
+    max-height: 80vh;
+    overflow-y: auto;
+    padding-right: 20px; /* smooth scroll space */
+}
+
+/* Glow border */
+.letter.glow{
+    box-shadow:0 0 35px #ffb3e6,0 0 65px #b388ff;
+}
+
+/* Typewriter */
+.typewriter{
+    font-size:1.3rem;
+    line-height:1.9;
+    white-space:pre-line;
+    overflow:hidden;
+    border-right:3px solid #333;
+    width:0;
+    animation:cursor 0.7s infinite;
+}
+
+@keyframes cursor{
+    0%,100%{border-color:transparent;}
+    50%{border-color:#333;}
+}
+
+/* Signature handwriting (6A) */
+.signature{
+    margin-top:25px;
+    font-family:'Pacifico',cursive;
+    font-size:1.5rem;
+    color:#ff4e91;
+    width:0;
+    overflow:hidden;
+    white-space:nowrap;
+    border-right:3px solid #ff8bcf;
+    animation:handwrite 3s steps(40) forwards;
+    animation-delay:5.5s;
+}
+
+@keyframes handwrite{
+    from{width:0;}
+    to{width:240px;}
+}
+
+/* Next Surprise Button */
+.next-btn{
+    margin-top:30px;
+    padding:12px 32px;
+    background:linear-gradient(120deg,#b388ff,#ff6ec4);
+    color:white;
+    border:none;
+    border-radius:30px;
+    font-size:1.2rem;
+    cursor:pointer;
+    opacity:0;
+    transition:0.4s ease;
+}
+
+.next-btn:hover{
+    transform:scale(1.08);
+}
+
+/* ---------------- FLOATING BUTTERFLIES + HEARTS ---------------- */
+.float{
+    position:fixed;
+    font-size:26px;
+    pointer-events:none;
+    animation:floater 6s linear infinite;
+    opacity:.75;
+}
+
+@keyframes floater{
+    0%{transform:translateY(0) rotate(0deg);}
+    100%{transform:translateY(-160px) rotate(8deg); opacity:0;}
+}
+
+/* SPARK EXPLOSION on OPEN */
+.spark{
+    position:fixed;
+    width:8px;
+    height:8px;
+    background:radial-gradient(circle,#fff,#ffccf7);
+    border-radius:50%;
+    animation:fall 2s linear forwards;
+}
+
+@keyframes fall{
+    from{transform:translateY(-20px) scale(1);}
+    to{transform:translateY(120vh) scale(0.3); opacity:0;}
+}
+
+/* Animations */
+@keyframes fadeIn{
+    0%{opacity:0; transform:translateY(30px);}
+    100%{opacity:1; transform:translateY(0);}
+}
+
+@keyframes bgShift{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+}
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- Envelope area -->
+<div class="envelope-container" id="envBox">
+    <div class="envelope" id="env"></div>
+    <p style="font-size:1.2rem;color:#333;">Tap to open your birthday letter 🎀</p>
+</div>
+
+<!-- LETTER -->
+<div class="letter" id="letterBox">
+    <div class="typewriter" id="letterText"></div>
+
+    <div class="signature">– Your normal friend</div>
+
+    <button class="next-btn" id="nextBtn">One last click →</button>
+</div>
+
+<audio id="bgm" src="letter.mp3"></audio>
+
+<script>
+/* ---------------- Spark Effects ---------------- */
+function sparkExplosion(){
+    for(let i=0;i<40;i++){
+        const s=document.createElement("div");
+        s.className="spark";
+        s.style.left=(window.innerWidth/2 + (Math.random()*200-100))+"px";
+        s.style.top=(window.innerHeight/2)+"px";
+        s.style.opacity = 0.9;
+        s.style.animationDuration = (1.3 + Math.random())+"s";
+        document.body.appendChild(s);
+        setTimeout(()=>s.remove(),2000);
+    }
+}
+
+/* ---------------- Floating Hearts + Butterflies ---------------- */
+setInterval(()=>{
+    const el=document.createElement("div");
+    el.className="float";
+
+    const arr=["💗","🦋","💞","💜","🦋","💖"];
+    el.innerHTML = arr[Math.floor(Math.random()*arr.length)];
+
+    el.style.left=Math.random()*window.innerWidth+"px";
+    el.style.top=(window.innerHeight-20)+"px";
+    el.style.fontSize=(20+Math.random()*20)+"px";
+    el.style.animationDuration=(4+Math.random()*4)+"s";
+
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),7000);
+},550);
+
+/* ---------------- Letter Text ---------------- */
+const msg = 
+`Dear Tanu,
+
+Happy Birthday! 🎉  
+Humari baatein roz nahi hoti,  
+par jitni hoti hain—they’re always easy, nice  
+and honestly thodi refreshing bhi.  
+Tum un logon me se ho  
+jo casual baat me bhi soft vibes de dete ho.
+
+Now the real part…  
+You’re genuinely sweet, calm  
+and focused on your goals.  
+Your dream of becoming an *Income Tax Officer*  
+really suits your personality —  
+sorted, steady and determined.  
+I hope this year brings you closer  
+to everything you're working for.
+
+Ab thoda funny ho jaaye...  
+jab tum officer ban jao,  
+bas ek request —  
+tax checking me “casual friend discount” de dena 😭😂  
+(just kidding… maybe.)
+
+Anyway, stay like you are —  
+sweet, sensible  
+and thodi si irritating in a cute way. 😌  
+`;
+
+/* ---------------- OPEN ENVELOPE ---------------- */
+document.getElementById("env").onclick = ()=>{
+
+    // Remove envelope
+    document.getElementById("envBox").style.display="none";
+
+    // Spark Explosion (3D effect)
+    sparkExplosion();
+
+    // Show letter box
+    const box = document.getElementById("letterBox");
+    box.style.opacity = "1";
+    box.style.top = "50%";
+    box.style.transform = "translate(-50%, -50%) scale(1)";
+    box.classList.add("glow");
+
+    // Autoplay music (2E)
+    document.getElementById("bgm").play().catch(()=>{});
+
+    // TYPEWRITER EFFECT
+    const writer = document.getElementById("letterText");
+    let i = 0;
+    writer.textContent = "";
+    writer.style.width = "100%";
+
+    const int = setInterval(()=>{
+        writer.textContent += msg[i];
+        i++;
+        if(i >= msg.length){
+            clearInterval(int);
+
+            // SHOW BUTTON AFTER WRITING
+            setTimeout(()=>{
+                document.getElementById("nextBtn").style.opacity="1";
+            },1000);
+        }
+    },27);
+};
+
+/* ---------------- Next Surprise Page ---------------- */
+document.getElementById("nextBtn").onclick = ()=>{
+    window.location.href = "birthday_show.html";
+};
+</script>
+
+</body>
+</html>
